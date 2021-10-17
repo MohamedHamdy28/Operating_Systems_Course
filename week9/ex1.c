@@ -1,64 +1,76 @@
-#include<stdio.h>
+#include <stdio.h>
 #include <stdint.h>
 
-struct page_frame_container{
+
+struct page{
     int name;
-    unit8_t counter;
+    uint8_t counter;
+    int cycle;
 };
-void accessed(struct& page)
-{
-
-}
 int main(){
-    int n,m;
+    int n,m,hit=0,miss=0;
     scanf("%d%d",&n,&m);
-    struct page_frame_container page_frames[n];
-    int hit=0,miss=0;
-
-    scanf("%d",&m);
-    for (int i=0;i<m;i++)
+    struct page page_table[n];
+    for(int i=0;i<n;i++)
     {
-        int t,a,h=0;
+        page_table[i].name=0;
+    }
+    uint8_t refranced[n];
+    int t,a;
+    int index;
+    for(int i=0;i<m;i++)
+    {
         scanf("%d%d",&t,&a);
-        for(int i=0;i<n;i++)
+        refranced[a]=1;
+        int f=0;
+        for (int i=0;i<n;i++)
         {
-            if(page_frames[i].num==a)
+            if(page_table[i].name==a)
             {
+                f=1;
                 hit++;
-                h=1;
-                accessed(page_frames[i]);
+                page_table[i].cycle=t;
+                break;
             }
         }
-        if(h==0)//miss
+        if(f==0)//miss
         {
             miss++;
-            unit8_t mn=225;
-            int index;
+            uint8_t mn=225;
             for(int i=0;i<n;i++)
             {
-                if(mn>page_frames[i].counter)
+                if(page_table[i].name==0)
                 {
-                    mn=page_frames[i].counter;
+                    index=i;
+
+                    break;
+                }
+                if(mn>page_table[i].counter)
+                {
+                    mn=page_table[i].counter;
+                    index=i;
+                }
+                if(mn==page_table[i].counter&&page_table[i].name<page_table[index].name)
+                {
+                    mn=page_table[i].counter;
                     index=i;
                 }
             }
-            page_frames[index].counter=0;
-            page_frames[index].name=a;
+
+            refranced[index]=0;
+            page_table[index].name=a;
+            page_table[index].counter=0;
+            page_table[index].cycle=t;
         }
         for(int i=0; i<n; i++)
         {
-            page_frames[i].counter = page_frames[i].counter >> 1;
-            if (h==0)
-            {
-                page_frames[i].counter = page_frames[i].counter | (0 << 8);
-            }
-            else
-            {
-                page_frames[i].counter = page_frames[i].counter | (1 << 8);
-            }
-
+            if(i==index)
+                continue;
+            page_table[i].counter = page_table[i].counter >> 1;
+            page_table[i].counter = page_table[i].counter | (refranced[i] << 8);
         }
+        printf("%d\n",f);
     }
-    printf("Hits: %d, Misses: %d\n", hit, miss);
-    printf("Hits/Misses = %f\n", hit/(double)miss);
+
+    printf("%f\n", hit/(double)miss);
 }
