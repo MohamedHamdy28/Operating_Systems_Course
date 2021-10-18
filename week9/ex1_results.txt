@@ -1,0 +1,10 @@
+./ex1.out 10
+Hits: 8, Misses: 992
+Hits/Misses = 0.008065
+./ex1.out 50
+Hits: 50, Misses: 950
+Hits/Misses = 0.052632
+./ex1.out 100
+Hits: 93, Misses: 907
+Hits/Misses = 0.102536
+
