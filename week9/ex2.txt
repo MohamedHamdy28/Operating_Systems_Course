@@ -1,0 +1,8 @@
+To increase H/M (maximize hit count, minimize miss count),
+we can increase the number of requests to the same page at consecutive times so that the number of page faults will be minimized and the number of hits will be maximized
+Example (4 page frames): 1 1 1 1 1 1 -> 5 hits, 1 miss
+
+To decrease H/M (minimize hit count, maximize miss count)
+we can request different references with a small number of repetitions so that the number of page faults will increase and the number of hits will decrease.
+Example (4 page frames): 1 2 3 4 5 6 -> 0 hits, 6 misses
+
