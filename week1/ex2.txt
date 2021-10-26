@@ -1,0 +1,146 @@
+    1  ssh-keygen -t ed25519 -C "m.abdelhamid@innopolis.university"
+    2  ls | grep mykey
+    3  cat mykey.pub
+    4  vim ~/.ssh/config
+    5  #!/usr/bin/env bash
+    6  work_dir=$(realpath "$(dirname $0)")
+    7  venv_dir=$1
+    8  if [ -z "$venv_dir" ]; then   venv_dir=venv; fi
+    9  cd ${work_dir}
+   10  if [[ -e ${venv_dir} ]]; then   echo;   echo "Virtualenv already exists. Use command to start working:";   echo "$ . ${venv_dir}/bin/activate";   exit; fi
+   11  CUDA_HOME_CANDIDATE=/usr/local/cuda
+   12  if [ -z "${CUDA_HOME}" ] && [ -d ${CUDA_HOME_CANDIDATE} ]; then   echo "Exporting CUDA_HOME as ${CUDA_HOME_CANDIDATE}";   export CUDA_HOME=${CUDA_HOME_CANDIDATE}; fi
+   13  # Download mmdetection submodule
+   14  git submodule update --init ../../external/mmdetection
+   15  # Create virtual environment
+   16  virtualenv ${venv_dir} -p python3 --prompt="(detection)"
+   17  path_openvino_vars="${INTEL_OPENVINO_DIR:-/opt/intel/openvino_2021}/bin/setupvars.sh"
+   18  if [[ -e "${path_openvino_vars}" ]]; then   echo ". ${path_openvino_vars}" >> ${venv_dir}/bin/activate; fi
+   19  . ${venv_dir}/bin/activate
+   20  if [ -z ${CUDA_VERSION} ] && [ -e "$CUDA_HOME/version.txt" ]; then   CUDA_VERSION=$(cat $CUDA_HOME/version.txt | sed -e "s/^.*CUDA Version *//" -e "s/ .*//"); fi
+   21  if [[ -z ${CUDA_VERSION} ]]; then   CUDA_VERSION=$(nvidia-smi | grep "CUDA Version" | sed -e "s/^.*CUDA Version: *//" -e "s/ .*//"); fi
+   22  echo "Using CUDA_VERSION as ${CUDA_VERSION}"
+   23  # Remove dots from CUDA version string, if any.
+   24  CUDA_VERSION_CODE=$(echo ${CUDA_VERSION} | sed -e "s/\.//" -e "s/\(...\).*/\1/")
+   25  # install ote.
+   26  pip install -e ../../ote/
+   27  # install PyTorch and MMCV.
+   28  export TORCH_VERSION=1.8.1
+   29  export TORCHVISION_VERSION=0.9.1
+   30  export MMCV_VERSION=1.3.0
+   31  if [[ $CUDA_VERSION_CODE == "102" ]]; then   pip install torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION}; else   pip install torch==${TORCH_VERSION}+cu${CUDA_VERSION_CODE} torchvision==${TORCHVISION_VERSION}+cu${CUDA_VERSION_CODE} -f https://download.pytorch.org/whl/torch_stable.html; fi
+   32  pip uninstall -y mmcv
+   33  pip install --no-cache-dir mmcv-full==${MMCV_VERSION} -f https://download.openmmlab.com/mmcv/dist/cu${CUDA_VERSION_CODE}/torch${TORCH_VERSION}/index.html
+   34  # Install other requirements.
+   35  cat requirements.txt | xargs -n 1 -L 1 pip3 install
+   36  mo_requirements_file="${INTEL_OPENVINO_DIR:-/opt/intel/openvino_2021}/deployment_tools/model_optimizer/requirements_onnx.txt"
+   37  if [[ -e "${mo_requirements_file}" ]]; then   pip install -qr ${mo_requirements_file}; else   echo "[WARNING] Model optimizer requirements were not installed. Please install the OpenVino toolkit to use one."; fi
+   38  pip install -e ../../external/mmdetection/
+   39  MMDETECTION_DIR=`realpath ../../external/mmdetection/`
+   40  echo "export MMDETECTION_DIR=${MMDETECTION_DIR}" >> ${venv_dir}/bin/activate
+   41  deactivate
+   42  echo
+   43  echo "Activate a virtual environment to start working:"
+   44  echo "$ . ${venv_dir}/bin/activate"
+   45  #!/usr/bin/env bash
+   46  work_dir=$(realpath "$(dirname $0)")
+   47  venv_dir=$1
+   48  if [ -z "$venv_dir" ]; then   venv_dir=venv; fi
+   49  cd ${work_dir}
+   50  if [[ -e ${venv_dir} ]]; then   echo;   echo "Virtualenv already exists. Use command to start working:";   echo "$ . ${venv_dir}/bin/activate";   exit; fi
+   51  CUDA_HOME_CANDIDATE=/usr/local/cuda
+   52  if [ -z "${CUDA_HOME}" ] && [ -d ${CUDA_HOME_CANDIDATE} ]; then   echo "Exporting CUDA_HOME as ${CUDA_HOME_CANDIDATE}";   export CUDA_HOME=${CUDA_HOME_CANDIDATE}; fi
+   53  # Download mmdetection submodule
+   54  git submodule update --init ../../external/mmdetection
+   55  # Create virtual environment
+   56  virtualenv ${venv_dir} -p python3 --prompt="(detection)"
+   57  path_openvino_vars="${INTEL_OPENVINO_DIR:-/opt/intel/openvino_2021}/bin/setupvars.sh"
+   58  if [[ -e "${path_openvino_vars}" ]]; then   echo ". ${path_openvino_vars}" >> ${venv_dir}/bin/activate; fi
+   59  . ${venv_dir}/bin/activate
+   60  if [ -z ${CUDA_VERSION} ] && [ -e "$CUDA_HOME/version.txt" ]; then   CUDA_VERSION=$(cat $CUDA_HOME/version.txt | sed -e "s/^.*CUDA Version *//" -e "s/ .*//"); fi
+   61  if [[ -z ${CUDA_VERSION} ]]; then   CUDA_VERSION=$(nvidia-smi | grep "CUDA Version" | sed -e "s/^.*CUDA Version: *//" -e "s/ .*//"); fi
+   62  echo "Using CUDA_VERSION as ${CUDA_VERSION}"
+   63  # Remove dots from CUDA version string, if any.
+   64  CUDA_VERSION_CODE=$(echo ${CUDA_VERSION} | sed -e "s/\.//" -e "s/\(...\).*/\1/")
+   65  # install ote.
+   66  pip install -e ../../ote/
+   67  # install PyTorch and MMCV.
+   68  export TORCH_VERSION=1.8.1
+   69  export TORCHVISION_VERSION=0.9.1
+   70  export MMCV_VERSION=1.3.0
+   71  if [[ $CUDA_VERSION_CODE == "102" ]]; then   pip install torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION}; else   pip install torch==${TORCH_VERSION}+cu${CUDA_VERSION_CODE} torchvision==${TORCHVISION_VERSION}+cu${CUDA_VERSION_CODE} -f https://download.pytorch.org/whl/torch_stable.html; fi
+   72  pip uninstall -y mmcv
+   73  pip install --no-cache-dir mmcv-full==${MMCV_VERSION} -f https://download.openmmlab.com/mmcv/dist/cu${CUDA_VERSION_CODE}/torch${TORCH_VERSION}/index.html
+   74  # Install other requirements.
+   75  cat requirements.txt | xargs -n 1 -L 1 pip3 install
+   76  mo_requirements_file="${INTEL_OPENVINO_DIR:-/opt/intel/openvino_2021}/deployment_tools/model_optimizer/requirements_onnx.txt"
+   77  if [[ -e "${mo_requirements_file}" ]]; then   pip install -qr ${mo_requirements_file}; else   echo "[WARNING] Model optimizer requirements were not installed. Please install the OpenVino toolkit to use one."; fi
+   78  pip install -e ../../external/mmdetection/
+   79  MMDETECTION_DIR=`realpath ../../external/mmdetection/`
+   80  echo "export MMDETECTION_DIR=${MMDETECTION_DIR}" >> ${venv_dir}/bin/activate
+   81  deactivate
+   82  echo
+   83  echo "Activate a virtual environment to start working:"
+   84  echo "$ . ${venv_dir}/bin/activate"
+   85  cd /mnt/c/Users/Electronica/Desktop
+   86  cd /mnt/C:/Users/Electronica/Desktop
+   87  cd /mnt/C/Users/Electronica/Desktop
+   88  cd /mnt/C/Users/Electronica/Desktop/
+   89  cd /mnt/C:/Users/Electronica/Desktop/
+   90  cd /mnt/C:/Users/Electronica/Desktop/
+   91  whoami
+   92  hostname
+   93  echo "lll"
+   94  man echo
+   95  man ls
+   96  manls
+   97  man whoami
+   98  man echo
+   99  help
+  100  q
+  101  echo --help
+  102  ls --help
+  103  nano f.txt
+  104  ls
+  105  ls
+  106  cat f,txt
+  107  cd Desktop/eclipse-workspace/
+  108  head -n 3
+  109  less f.txt
+  110  head -f.txt 3
+  111  head --help
+  112  head f.txt
+  113  cat f.txt
+  114  grep man f.txt
+  115  grep a7 f.txt
+  116  grep --helo
+  117  grep --help
+  118  pwd
+  119  nano m.txt
+  120  cd m
+  121  ls
+  122  cd eclipse-workspace
+  123  m.txt
+  124  cat m.txt
+  125  cd ..
+  126  cd
+  127  ls | sort -r | tail 
+  128  ls | sort -r | tail -n 3
+  129  cat m.txt
+  130  mv m.txt ma.txt
+  131  cat m.txt
+  132  cat ma.txt
+  133  nano ggg.txt &
+  134  fg %1
+  135  rm ggg.txt
+  136  cat ma.txt
+  137  cat ggg.txt
+  138  rm f.txt
+  139  mkdir ~ /week1
+  140  mkdir ~/week1
+  141  cd week1
+  142  ls /usr/bin
+  143  ls /usr/bin | grep gcc | sort -r
+  144  ls /usr/bin | grep gcc | sort -r > ex1.txt
+  145  cat ex1.txt
+  146  history > ex2.txt
