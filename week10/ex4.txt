@@ -1,4 +1,4 @@
 File -- Hard Links
 
-file1.txt -- link0 link1 
-link1 -- link0 link1 
+file1.txt -- file1.txt link1 
+link1 -- file1.txt link1 
