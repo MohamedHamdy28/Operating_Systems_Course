@@ -46,6 +46,9 @@
 What is dma1?
 - it represents direct memory access, it is a feature that allow a certain hardware to access RAM independent of the cpu.
 
+what is pic1?
+- it represents Peripherical Interface Controller which is a type of microcontroller component that is used in the development of electronics, computers, robotics and similar devices.
+
 What is timer1?
 - timer1 module is a 16-bit timer/counter within most PIC MCU devices. it can increment up to a value of 65535 before it overflows back to zero.
 
