@@ -17,9 +17,9 @@ while(1){
   read(fd,&evt,sizeof(evt));
   if(evt.type==EV_KEY)
   { if(evt.value==0)
-  	 printf("RELEASED, code [0x00%x,(%d)]\n", evt.code);
+  	 printf("RELEASED 0x00%x (%d)\n", evt.code);
     if(evt.value==1)
-	printf("PRESSED, code [0x00%x,(%d)]\n",evt.code);	
+	printf("PRESSED 0x00%x (%d)\n",evt.code);	
 }
 }
 }  
