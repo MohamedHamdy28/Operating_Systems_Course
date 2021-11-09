@@ -1,0 +1,15 @@
+The available shortcuts:
+p+e--> I passed the Exam
+c+a+p-->Get some cappuccino!
+c+e-->I LOVE OS
+pI passed the Exam
+ecaGet some cappuccino!
+pcI LOVE OS
+I LOVE OS
+eI LOVE OS
+cI LOVE OS
+I LOVE OS
+eI LOVE OS
+caGet some cappuccino!
+pcaGet some cappuccino!
+p
